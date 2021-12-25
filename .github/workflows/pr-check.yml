@@ -19,7 +19,7 @@ jobs:
       - name: \[pre] V (build)
         run: |
           make -j$(nproc)
-          sudo v symlink
+          sudo ./v symlink
         working-directory: ./v
 
       - name: Checkout
@@ -42,7 +42,7 @@ jobs:
       - name: \[pre] V (build)
         run: |
           make -j$(nproc)
-          sudo v symlink
+          sudo ./v symlink
         working-directory: ./v
 
       - name: Checkout
