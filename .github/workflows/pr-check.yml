@@ -5,13 +5,14 @@ on:
       # - '*'
       # - '!main'
       - 'main'
+env:
+  REPO_DIR: repo
+
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
     # runs-on: macos-latest
-    env:
-      REPO_DIR: repo
     steps:
       - name: \[pre] V (checkout)
         uses: actions/checkout@v2
@@ -30,13 +31,15 @@ jobs:
         with:
           path: ${{ env.REPO_DIR }}
 
-
-      - name: Build
-        run: v -o derive bin/derive
+      - name: Run
+        run: v run main.v
         working-directory: ${{ env.REPO_DIR }}
-      - name: Test
-        run: v test examples/simple
-        working-directory: ${{ env.REPO_DIR }}
+      # - name: Build
+      #   run: v -o derive bin/derive
+      #   working-directory: ${{ env.REPO_DIR }}
+      # - name: Test
+      #   run: v test examples/simple
+      #   working-directory: ${{ env.REPO_DIR }}
 
   fmt:
     name: fmt
@@ -55,8 +58,12 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: ${{ env.REPO_DIR }}
 
       - name: format
         run: v fmt -w .
+        working-directory: ${{ env.REPO_DIR }}
       - name: Check modified
         run: git diff --exit-code
+        working-directory: ${{ env.REPO_DIR }}
