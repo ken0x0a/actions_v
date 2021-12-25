@@ -20,6 +20,7 @@ jobs:
         run: |
           make -j$(nproc)
           sudo v symlink
+        working-directory: ./v
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -42,6 +43,7 @@ jobs:
         run: |
           make -j$(nproc)
           sudo v symlink
+        working-directory: ./v
 
       - name: Checkout
         uses: actions/checkout@v2
