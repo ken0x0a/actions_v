@@ -10,6 +10,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     # runs-on: macos-latest
+    env:
+      REPO_DIR: repo
     steps:
       - name: \[pre] V (checkout)
         uses: actions/checkout@v2
@@ -17,18 +19,24 @@ jobs:
           repository: vlang/v
           path: v
       - name: \[pre] V (build)
+          # make -j$(sysctl -n hw.logicalcpu)
         run: |
           make -j$(nproc)
-          ./v symlink
+          sudo ./v symlink
         working-directory: ./v
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: ${{ env.REPO_DIR }}
+
 
       - name: Build
         run: v -o derive bin/derive
+        working-directory: ${{ env.REPO_DIR }}
       - name: Test
         run: v test examples/simple
+        working-directory: ${{ env.REPO_DIR }}
 
   fmt:
     name: fmt
