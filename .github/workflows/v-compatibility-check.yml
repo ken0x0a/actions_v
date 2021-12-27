@@ -23,7 +23,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ env.HASH_STATE_FILE }}
-          key: ${{ env.HASH_STATE_FILE }}
+          key: key-${{ env.HASH_STATE_FILE }}
+      # Only for the 1st run.
       - name: Create state file
         if: steps.last-hash.outputs.cache-hit != 'true'
         run: echo -n 'a' > ./${{ env.HASH_STATE_FILE }}
@@ -81,8 +82,8 @@ jobs:
         id: last-hash
         uses: actions/cache@v2
         with:
-          path: ./last_hash
-          key: last_hash
+          path: ./${{ env.HASH_STATE_FILE }}
+          key: key-${{ env.HASH_STATE_FILE }}
       - name: \[pre] V (checkout)
         uses: actions/checkout@v2
         with:
@@ -105,7 +106,7 @@ jobs:
         working-directory: ${{ env.REPO_DIR }}
 
       - name: Update state
-        run: echo -n "${{needs.check-hash.outputs.hash}}" > ./last_hash
+        run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
       # - name: Build
       #   run: v -o derive bin/derive
       #   working-directory: ${{ env.REPO_DIR }}
