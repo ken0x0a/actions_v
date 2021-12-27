@@ -11,6 +11,7 @@ env:
 
 jobs:
   check-hash:
+    name: Check HASH
     runs-on: ubuntu-latest
     outputs:
       cache-hit: ${{ steps.is-last-hash.outputs.cache-hit }}
@@ -28,44 +29,6 @@ jobs:
       # - name: Force exit if cache found
       #   if: steps.is-last-hash.outputs.cache-hit == 'true'
       #   run: exit 1
-      # - name: new commits in V?
-      #   if: steps.is-last-hash.outputs.cache-hit != 'true'
-
-  compat-check:
-    # As this action is for checking V. compatibility,
-    # no need to run further jobs if V repo doesn't changed.
-    needs: [check-hash]
-    # if: needs.check-hash.steps.is-last-hash.outputs.cache-hit != 'true'
-    if: needs.check-hash.outputs.cache-hit != 'true'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - name: \[pre] V (checkout)
-        uses: actions/checkout@v2
-        with:
-          repository: vlang/v
-          path: v
-      - name: \[pre] V (build)
-          # make -j$(sysctl -n hw.logicalcpu)
-        run: |
-          make -j$(nproc)
-          sudo ./v symlink
-        working-directory: ./v
-
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          path: ${{ env.REPO_DIR }}
-
-      - name: Run
-        run: v run main.v
-        working-directory: ${{ env.REPO_DIR }}
-      # - name: Build
-      #   run: v -o derive bin/derive
-      #   working-directory: ${{ env.REPO_DIR }}
-      # - name: Test
-      #   run: v test examples/simple
-      #   working-directory: ${{ env.REPO_DIR }}
+      - name: new commits in V?
+        if: steps.is-last-hash.outputs.cache-hit != 'true'
+        uses: ./.github/actions/compat-check.yml
