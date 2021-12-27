@@ -12,6 +12,8 @@ env:
 jobs:
   check-hash:
     runs-on: ubuntu-latest
+    outputs:
+      cache-hit: ${{ steps.is-last-hash.outputs.cache-hit }}
     steps:
       - name: Get V repo latest hash
         id: v-latest-hash
@@ -33,8 +35,8 @@ jobs:
     # As this action is for checking V. compatibility,
     # no need to run further jobs if V repo doesn't changed.
     needs: [check-hash]
-    if: needs.check-hash.steps.is-last-hash.outputs.cache-hit != 'true'
-    # if: needs.check-hash.outputs.status == 'success'
+    # if: needs.check-hash.steps.is-last-hash.outputs.cache-hit != 'true'
+    if: needs.check-hash.outputs.cache-hit != 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
