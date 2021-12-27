@@ -1,7 +1,7 @@
 name: V Compatibility Check!
 on:
   # schedule:
-  #   - cron: '*/2 * * * *'
+  #   - cron: '17 */2 * * *'
   push:
     branches:
       - "main"
@@ -89,11 +89,13 @@ jobs:
         with:
           repository: vlang/v
           path: v
-      - name: \[pre] V (build)
-          # make -j$(sysctl -n hw.logicalcpu)
-        run: |
-          make -j$(nproc)
-          sudo ./v symlink
+      - name: \[pre] V (build) (linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: make -j$(nproc)
+        working-directory: ./v
+      - name: \[pre] V (build) (macos)
+        if: matrix.os == 'macos-latest'
+        run: make -j$(sysctl -n hw.logicalcpu)
         working-directory: ./v
 
       - name: Checkout
