@@ -23,16 +23,18 @@ jobs:
         with:
           path: ./
           key: ${{ steps.v-latest-hash.outputs.value }}
-      # As this action is for checking V. compatibility,
-      # no need to run further jobs if V repo doesn't changed.
-      - name: Force exit if cache found
-        if: steps.is-last-hash.outputs.cache-hit == 'true'
-        run: exit 1
+      # - name: Force exit if cache found
+      #   if: steps.is-last-hash.outputs.cache-hit == 'true'
+      #   run: exit 1
       # - name: new commits in V?
       #   if: steps.is-last-hash.outputs.cache-hit != 'true'
 
   compat-check:
+    # As this action is for checking V. compatibility,
+    # no need to run further jobs if V repo doesn't changed.
     needs: [check-hash]
+    if: needs.check-hash.steps.is-last-hash.outputs.cache-hit != 'true'
+    # if: needs.check-hash.outputs.status == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
