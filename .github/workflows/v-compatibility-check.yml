@@ -30,5 +30,5 @@ jobs:
       #   if: steps.is-last-hash.outputs.cache-hit == 'true'
       #   run: exit 1
       - name: new commits in V?
-        if: steps.is-last-hash.outputs.cache-hit != 'true'
+        if: steps.is-last-hash.outputs.cache-hit == 'true'
         uses: ./.github/actions/compat-check.yml
