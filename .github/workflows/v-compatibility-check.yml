@@ -29,7 +29,7 @@ jobs:
         run: |
           the_last_hash=$(git ls-remote https://github.com/vlang/v.git master | awk '{ print $1 }')
           echo "::set-output name=value::$(the_last_hash)"
-          if [ $the_last_hash == $(cat ./last_hash) ]; then 
+          if [ $the_last_hash != $(cat ./last_hash) ]; then 
             echo "::set-output name=changed::true"
           fi
         # run: git ls-remote https://github.com/vlang/v.git master | awk '{ print $1 }'
@@ -46,7 +46,7 @@ jobs:
         run: |
           the_last_hash=$(git rev-parse HEAD)
           echo "::set-output name=value::$(the_last_hash)"
-          if [ $the_last_hash == $(cat ./last_hash) ]; then 
+          if [ $the_last_hash != $(cat ./last_hash) ]; then 
             echo "::set-output name=changed::true"
           fi
 
