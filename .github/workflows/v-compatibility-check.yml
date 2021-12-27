@@ -31,4 +31,4 @@ jobs:
       #   run: exit 1
       - name: new commits in V?
         # if: steps.is-last-hash.outputs.cache-hit != 'true'
-        uses: ./.github/workflows/compat-check.yml
+        uses: ken0x0a/actions_v/.github/workflows/compat-check.yml@main
