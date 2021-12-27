@@ -5,6 +5,9 @@ on:
     branches:
       - "main"
 
+env:
+  REPO_DIR: repo
+
 jobs:
   check-hash:
     runs-on: ubuntu-latest
@@ -12,6 +15,7 @@ jobs:
       - name: Get V repo latest hash
         id: v-latest-hash
         run: echo "::set-output name=value::$(git ls-remote https://github.com/vlang/v.git master | awk '{ print $1 }')"
+        timeout-minutes: 2
       - name: Check cache with hash
         id: is-last-hash
         uses: actions/cache@v2
