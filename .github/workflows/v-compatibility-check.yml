@@ -19,9 +19,9 @@ jobs:
       # no need to run further jobs if V repo doesn't changed.
       - name: Force exit if cache found
         if: steps.is-last-hash.outputs.cache-hit == 'true'
-      - name: new commits in V?
-        if: steps.is-last-hash.outputs.cache-hit != 'true'
-
+        run: exit 1
+      # - name: new commits in V?
+      #   if: steps.is-last-hash.outputs.cache-hit != 'true'
 
   compat-check:
     needs: [check-hash]
