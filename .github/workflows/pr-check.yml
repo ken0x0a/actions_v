@@ -1,6 +1,6 @@
 name: PR check!
 on:
-  push:
+  pull_request:
     branches:
       # - '*'
       # - '!main'
