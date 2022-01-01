@@ -14,14 +14,18 @@ env:
 jobs:
   build-sqlite:
     name: Build Sqlite
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
     steps:
       - name: Try Load SQLite
         id: sqlite
         uses: actions/cache@v2
         with:
           path: ./sqlite-autoconf-${{ env.SQLITE_VERSION }}
-          key: key-sqlite-${{ env.SQLITE_VERSION }}
+          key: key-sqlite-${{ matrix.os }}-${{ env.SQLITE_VERSION }}
       - name: Build
         if: steps.sqlite.outputs.cache-hit != 'true'
         run: |
@@ -30,6 +34,12 @@ jobs:
           cd sqlite-autoconf-${{ env.SQLITE_VERSION }}
           ./configure
           make
+      - name: List directory
+        run: ls -la sqlite-autoconf-${{ env.SQLITE_VERSION }}
+      - name: Install
+        run: sudo make install
+      - name: Print version
+        run: sqlite3 --version
 
   check-hash:
     name: Check HASH
@@ -118,7 +128,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./sqlite-autoconf-${{ env.SQLITE_VERSION }}
-          key: key-sqlite-${{ env.SQLITE_VERSION }}
+          key: key-sqlite-${{ matrix.os }}-${{ env.SQLITE_VERSION }}
       - name: install sqlite
         run: |
           cd sqlite-autoconf-${{ env.SQLITE_VERSION }}
