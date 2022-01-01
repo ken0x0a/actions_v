@@ -37,7 +37,7 @@ jobs:
       - name: List directory
         run: ls -la sqlite-autoconf-${{ env.SQLITE_VERSION }}
       - name: Install
-        run: sudo make install
+        run: cd sqlite-autoconf-${{ env.SQLITE_VERSION }} && sudo make install
       - name: Print version
         run: sqlite3 --version
 
