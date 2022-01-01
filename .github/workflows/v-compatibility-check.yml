@@ -154,7 +154,7 @@ jobs:
 
       - name: Test
         if: matrix.os == 'ubuntu-latest'
-        run: v -v test .
+        run: LD_LIBRARY_PATH=/usr/local/lib v -v test .
         working-directory: sqlite0
 
       - name: Install SQLite3
