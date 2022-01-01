@@ -93,8 +93,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        # os: [ubuntu-latest, macos-latest]
+        # os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Load latest hash
         id: last-hash
@@ -130,7 +130,7 @@ jobs:
         with:
           path: ./sqlite-autoconf-${{ env.SQLITE_VERSION }}
           key: key-sqlite-${{ matrix.os }}-${{ env.SQLITE_VERSION }}
-      - name: install sqlite
+      - name: Install SQLite3
         if: matrix.os == 'ubuntu-latest'
         run: |
           cd sqlite-autoconf-${{ env.SQLITE_VERSION }}
@@ -153,8 +153,31 @@ jobs:
           v run main.v
 
       - name: Test
+        if: matrix.os == 'ubuntu-latest'
         run: v -v test .
         working-directory: ${{ env.REPO_DIR }}
 
+      - name: Install SQLite3
+        if: matrix.os == 'macos-latest'
+        run: brew install sqlite3
+
+      - name: Test
+        if: matrix.os == 'macos-latest'
+        run: v -v test .
+        working-directory: ${{ env.REPO_DIR }}
+
+      # - name: Update state
+      #   run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
+
+  update_hash:
+    name: Update Cache
+    runs-on: ubuntu-latest
+    steps:
+      - name: Load latest hash
+        id: last-hash
+        uses: actions/cache@v2
+        with:
+          path: ./${{ env.HASH_STATE_FILE }}
+          key: key-${{ env.HASH_STATE_FILE }}
       - name: Update state
         run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
