@@ -1,10 +1,10 @@
 name: V Compatibility Check!
 on:
-  # schedule:
-  #   - cron: '21,51 * * * *'
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '11,41 * * * *'
+  # push:
+  #   branches:
+  #     - main
 
 env:
   REPO_DIR: repo
@@ -142,15 +142,15 @@ jobs:
           repository: ken0x0a/v_sqlite0
           ssh-key: ${{ secrets.DEPLOY_KEY_SQLITE0 }}
           path: sqlite0
-      - name: print lib version
-        run: |
-          cat <<EOF > main.v
-          import sqlite0
-          fn main() {
-            dump(sqlite0.version())
-          }
-          EOF
-          v run main.v
+      # - name: print lib version
+      #   run: |
+      #     cat <<EOF > main.v
+      #     import sqlite0
+      #     fn main() {
+      #       dump(sqlite0.version())
+      #     }
+      #     EOF
+      #     v run main.v
 
       - name: Test
         if: matrix.os == 'ubuntu-latest'
