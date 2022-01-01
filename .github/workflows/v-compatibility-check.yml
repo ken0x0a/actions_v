@@ -53,7 +53,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ env.HASH_STATE_FILE }}
-          key: key-${{ env.HASH_STATE_FILE }}
+          key: hash-${{ env.HASH_STATE_FILE }}
       # Only for the 1st run.
       - name: Create state file
         if: steps.last-hash.outputs.cache-hit != 'true'
@@ -101,7 +101,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ env.HASH_STATE_FILE }}
-          key: key-${{ env.HASH_STATE_FILE }}
+          key: hash-${{ env.HASH_STATE_FILE }}
       - name: \[pre] V (checkout)
         uses: actions/checkout@v2
         with:
@@ -171,6 +171,7 @@ jobs:
 
   update_hash:
     name: Update Cache
+    needs: [compat-check]
     runs-on: ubuntu-latest
     steps:
       - name: Load latest hash
@@ -178,6 +179,6 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ env.HASH_STATE_FILE }}
-          key: key-${{ env.HASH_STATE_FILE }}
+          key: hash-${{ env.HASH_STATE_FILE }}
       - name: Update state
         run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
