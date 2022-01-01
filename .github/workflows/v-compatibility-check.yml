@@ -155,7 +155,7 @@ jobs:
       - name: Test
         if: matrix.os == 'ubuntu-latest'
         run: v -v test .
-        working-directory: ${{ env.REPO_DIR }}
+        working-directory: sqlite0
 
       - name: Install SQLite3
         if: matrix.os == 'macos-latest'
@@ -163,8 +163,8 @@ jobs:
 
       - name: Test
         if: matrix.os == 'macos-latest'
-        run: v -v test .
-        working-directory: ${{ env.REPO_DIR }}
+        run: v -cflags '-L/usr/local/opt/sqlite/lib' -v test .
+        working-directory: sqlite0
 
       # - name: Update state
       #   run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
