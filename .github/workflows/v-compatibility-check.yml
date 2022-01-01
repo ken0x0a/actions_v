@@ -1,10 +1,10 @@
 name: V Compatibility Check!
 on:
   # schedule:
-  #   - cron: '17 */2 * * *'
+  #   - cron: '21,51 * * * *'
   push:
     branches:
-      - "main"
+      - main
 
 env:
   REPO_DIR: repo
@@ -36,7 +36,6 @@ jobs:
           if [ $the_last_hash != $(cat ./${{ env.HASH_STATE_FILE }}) ]; then 
             echo "::set-output name=changed::true"
           fi
-        # run: git ls-remote https://github.com/vlang/v.git master | awk '{ print $1 }'
         timeout-minutes: 1
       - name: fallback s1
         if: steps.v_latest_hash.conclusion == 'failure'
@@ -54,18 +53,6 @@ jobs:
             echo "::set-output name=changed::true"
           fi
 
-      # - name: Check cache with hash
-      #   id: is-last-hash
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ./
-      #     key: ${{ steps.v_latest_hash.outputs.value }}
-      # - name: Force exit if cache found
-      #   if: steps.is-last-hash.outputs.cache-hit == 'true'
-      #   run: exit 1
-      # - name: new commits in V?
-      #   if: steps.is-last-hash.outputs.cache-hit != 'true'
-
   compat-check:
     # As this action is for checking V. compatibility,
     # no need to run further jobs if V repo doesn't changed.
@@ -76,7 +63,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
+        # os: [ubuntu-latest, macos-latest]
     steps:
       - name: Load latest hash
         id: last-hash
@@ -100,21 +88,21 @@ jobs:
       - name: \[pre] V (symlink)
         run: sudo ./v symlink
         working-directory: ./v
+      - name: Print V info
+        run: v doctor
+      - name: install dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install --quiet -y libsqlite3-dev
 
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          repository: ken0x0a/v_sqlite0
           path: ${{ env.REPO_DIR }}
 
-      - name: Run
-        run: v run main.v
+      - name: Test
+        run: v -v test .
         working-directory: ${{ env.REPO_DIR }}
 
       - name: Update state
         run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
-      # - name: Build
-      #   run: v -o derive bin/derive
-      #   working-directory: ${{ env.REPO_DIR }}
-      # - name: Test
-      #   run: v test examples/simple
-      #   working-directory: ${{ env.REPO_DIR }}
