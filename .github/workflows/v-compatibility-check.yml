@@ -92,12 +92,13 @@ jobs:
         run: v doctor
       - name: install dependencies
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install --quiet -y libsqlite3-dev
+        run: sudo apt-get update && sudo apt-get install --quiet -y libsqlite3-dev
 
       - name: Checkout
         uses: actions/checkout@v2
         with:
           repository: ken0x0a/v_sqlite0
+          ssh-key: ${{ secrets.DEPLOY_KEY_SQLITE0 }}
           path: ${{ env.REPO_DIR }}
 
       - name: Test
