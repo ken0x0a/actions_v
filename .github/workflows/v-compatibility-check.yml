@@ -124,12 +124,14 @@ jobs:
       #   if: matrix.os == 'ubuntu-latest'
       #   run: sudo apt-get update && sudo apt-get install --quiet -y libsqlite3-dev
       - name: Try Load SQLite
+        if: matrix.os == 'ubuntu-latest'
         id: sqlite
         uses: actions/cache@v2
         with:
           path: ./sqlite-autoconf-${{ env.SQLITE_VERSION }}
           key: key-sqlite-${{ matrix.os }}-${{ env.SQLITE_VERSION }}
       - name: install sqlite
+        if: matrix.os == 'ubuntu-latest'
         run: |
           cd sqlite-autoconf-${{ env.SQLITE_VERSION }}
           sudo make install
@@ -139,7 +141,16 @@ jobs:
         with:
           repository: ken0x0a/v_sqlite0
           ssh-key: ${{ secrets.DEPLOY_KEY_SQLITE0 }}
-          path: ${{ env.REPO_DIR }}
+          path: sqlite0
+      - name: print lib version
+        run: |
+          cat <<EOF > main.v
+          import sqlite0
+          fn main() {
+            dump(sqlite0.version())
+          }
+          EOF
+          v run main.v
 
       - name: Test
         run: v -v test .
