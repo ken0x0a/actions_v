@@ -76,7 +76,7 @@ jobs:
   compat-check:
     # As this action is for checking V. compatibility,
     # no need to run further jobs if V repo doesn't changed.
-    needs: [check-hash]
+    needs: [build-sqlite, check-hash]
     # if: needs.check-hash.steps.is-last-hash.outputs.cache-hit != 'true'
     if: needs.check-hash.outputs.changed == 'true'
     runs-on: ${{ matrix.os }}
@@ -113,6 +113,12 @@ jobs:
       # - name: install dependencies
       #   if: matrix.os == 'ubuntu-latest'
       #   run: sudo apt-get update && sudo apt-get install --quiet -y libsqlite3-dev
+      - name: Try Load SQLite
+        id: sqlite
+        uses: actions/cache@v2
+        with:
+          path: ./sqlite-autoconf-${{ env.SQLITE_VERSION }}
+          key: key-sqlite-${{ env.SQLITE_VERSION }}
       - name: install sqlite
         run: |
           cd sqlite-autoconf-${{ env.SQLITE_VERSION }}
