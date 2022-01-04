@@ -6,7 +6,7 @@ on:
       - '!main'
 env:
   REPO_DIR: repo
-  DUMMY_HASH: 519157e
+  DUMMY_HASH: 9974495f5e9e1d92af45b93fff726d88c6615638
   HASH_STATE_FILE: last_hash
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
 
       - name: always()
         if: failure()
-        run: echo -n "00112233" > ./${{ env.HASH_STATE_FILE }}
+        run: echo -n "1ad4fbd841abb9ced7a6b1225fe309acb27f5def" > ./${{ env.HASH_STATE_FILE }}
 
       - name: set prev hash
         if: failure()
@@ -29,6 +29,6 @@ jobs:
       - name: Report V_REPO Hash to Discord
         if: failure()
         run: |
-          curl -X POST -H "Content-Type: application/json" -d '{"content": "**${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ env.DUMMY_HASH }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>"}' $DISCORD_WEBHOOK_URL
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "**${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ env.DUMMY_HASH }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>\n<https://github.com/vlang/v/compare/${{ steps.prev_hash.outputs.value }}...${{ env.DUMMY_HASH }}>"}' $DISCORD_WEBHOOK_URL
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
