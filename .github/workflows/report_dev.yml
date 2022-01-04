@@ -29,6 +29,6 @@ jobs:
       - name: Report V_REPO Hash to Discord
         if: failure()
         run: |
-          curl -X POST -H "Content-Type: application/json" -d '{"content": "${{ github.repository }} start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ env.DUMMY_HASH }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>"}' $DISCORD_WEBHOOK_URL
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "**${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ env.DUMMY_HASH }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>"}' $DISCORD_WEBHOOK_URL
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
