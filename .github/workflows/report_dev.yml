@@ -17,30 +17,18 @@ jobs:
       - name: Fail
         run: exit 1
       - run: echo "should never run"
-      - name: Is here executed?
-        if: failure()
-        run: echo "How?"
-
-      - name: Normal
-        run: echo "Normal"
 
       - name: always()
         if: failure()
         run: echo -n "00112233" > ./${{ env.HASH_STATE_FILE }}
+
       - name: set prev hash
         if: failure()
         id: prev_hash
         run: echo "::set-output name=value::$(cat ./${{ env.HASH_STATE_FILE }})"
-      - name: failure()
-        if: failure()
-        run: echo "failure()"
-
-      - name: Normal
-        run: echo "Normal"
-
       - name: Report V_REPO Hash to Discord
         if: failure()
         run: |
-          curl -X POST -H "Content-Type: application/json" -d '{"content": "After \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ env.DUMMY_HASH }}\""}' $DISCORD_WEBHOOK_URL
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "${{ env.GITHUB_REPOSITORY }} start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ env.DUMMY_HASH }}\""}' $DISCORD_WEBHOOK_URL
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
