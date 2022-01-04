@@ -38,3 +38,5 @@ jobs:
         if: failure()
         run: |
           curl -X POST -H "Content-Type: application/json" -d '{"content": "After \"$(cat ./${{ env.HASH_STATE_FILE }})\" .. \"${{ env.DUMMY_HASH }}\""}' $DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ env.DISCORD_WEBHOOK_URL }}
