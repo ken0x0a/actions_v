@@ -1,0 +1,34 @@
+name: Dev
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
+env:
+  REPO_DIR: repo
+
+jobs:
+  dev:
+    name: Dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail
+        run: exit 1
+      - run: echo "should never run"
+      - name: Is here executed?
+        if: failure()
+        run: echo "How?"
+
+      - name: Normal
+        run: echo "Normal"
+
+      - name: always()
+        if: always()
+        run: echo "${{ always()} }"
+      - name: failure()
+        if: failure()
+        run: echo "${{ failure() }}"
+
+      - name: Normal
+        run: echo "Normal"
+
