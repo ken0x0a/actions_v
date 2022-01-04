@@ -1,0 +1,40 @@
+name: Dev
+on:
+  push:
+    branches:
+      - '*'
+      - '!main'
+env:
+  REPO_DIR: repo
+  DUMMY_HASH: 519157e
+  HASH_STATE_FILE: last_hash
+
+jobs:
+  dev:
+    name: Dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail
+        run: exit 1
+      - run: echo "should never run"
+      - name: Is here executed?
+        if: failure()
+        run: echo "How?"
+
+      - name: Normal
+        run: echo "Normal"
+
+      - name: always()
+        if: always()
+        run: echo -n "00112233" > ./${{ env.HASH_STATE_FILE }}
+      - name: failure()
+        if: failure()
+        run: echo "failure()"
+
+      - name: Normal
+        run: echo "Normal"
+
+      - name: Report V_REPO Hash to Discord
+        if: failure()
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "After \"$(cat ./${{ env.HASH_STATE_FILE }})\" .. \"${{ env.DUMMY_HASH }}\""}' $DISCORD_WEBHOOK_URL
