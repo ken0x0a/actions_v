@@ -78,7 +78,7 @@ jobs:
         if: steps.v_latest_hash.conclusion == 'failure'
         run: |
           the_last_hash=$(git rev-parse HEAD)
-          echo "::set-output name=value::$(the_last_hash)"
+          echo "::set-output name=value::$the_last_hash"
           if [ $the_last_hash != $(cat ./${{ env.HASH_STATE_FILE }}) ]; then 
             echo "::set-output name=changed::true"
           fi
@@ -169,9 +169,20 @@ jobs:
       # - name: Update state
       #   run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
 
+      - name: set prev hash
+        if: failure()
+        id: prev_hash
+        run: echo "::set-output name=value::$(cat ./${{ env.HASH_STATE_FILE }})"
+      - name: Report V_REPO Hash to Discord
+        if: failure()
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "**${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ needs.check-hash.outputs.hash }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>\n<https://github.com/vlang/v/compare/${{ steps.prev_hash.outputs.value }}...${{ needs.check-hash.outputs.hash }}>"}' $DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
   update_hash:
     name: Update Cache
-    needs: [compat-check]
+    needs: [compat-check, check-hash]
     runs-on: ubuntu-latest
     steps:
       - name: Load latest hash
