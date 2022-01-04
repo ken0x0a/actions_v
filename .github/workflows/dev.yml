@@ -24,7 +24,7 @@ jobs:
 
       - name: always()
         if: always()
-        run: echo "${{ always()} }"
+        run: echo "${{ always() }}"
       - name: failure()
         if: failure()
         run: echo "${{ failure() }}"
