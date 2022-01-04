@@ -163,7 +163,7 @@ jobs:
 
       - name: Test
         if: matrix.os == 'macos-latest'
-        run: v -cflags '-L/usr/local/opt/sqlite/lib' -v test .
+        run: v -cflags '-L/usr/local/opt/sqlite/lib' -cflags '-I/usr/local/opt/sqlite/include' -v test .
         working-directory: sqlite0
 
       # - name: Update state
