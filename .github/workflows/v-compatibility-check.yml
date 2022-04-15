@@ -101,7 +101,10 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ env.HASH_STATE_FILE }}
-          key: hash-${{ env.HASH_STATE_FILE }}
+          key: hash-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-${{ needs.check-hash.outputs.hash }}
+          restore-keys: |
+            hash-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-
+            hash-${{ env.HASH_STATE_FILE }}-
       - name: \[pre] V (checkout)
         uses: actions/checkout@v2
         with:
@@ -176,7 +179,7 @@ jobs:
       - name: Report V_REPO Hash to Discord
         if: failure()
         run: |
-          curl -X POST -H "Content-Type: application/json" -d '{"content": "**${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ needs.check-hash.outputs.hash }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>\n<https://github.com/vlang/v/compare/${{ steps.prev_hash.outputs.value }}...${{ needs.check-hash.outputs.hash }}>"}' $DISCORD_WEBHOOK_URL
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "[${{ runner.os }}] **${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ needs.check-hash.outputs.hash }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>\n<https://github.com/vlang/v/compare/${{ steps.prev_hash.outputs.value }}...${{ needs.check-hash.outputs.hash }}>"}' $DISCORD_WEBHOOK_URL
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
@@ -190,6 +193,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ./${{ env.HASH_STATE_FILE }}
-          key: hash-${{ env.HASH_STATE_FILE }}
+          key: hash-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-${{ needs.check-hash.outputs.hash }}
+          restore-keys: |
+            hash-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-
+            hash-${{ env.HASH_STATE_FILE }}-
       - name: Update state
         run: echo -n "${{needs.check-hash.outputs.hash}}" > ./${{ env.HASH_STATE_FILE }}
