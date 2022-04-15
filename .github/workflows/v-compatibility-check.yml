@@ -98,7 +98,7 @@ jobs:
     steps:
       - name: Load latest hash
         id: last-hash
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ./${{ env.HASH_STATE_FILE }}
           key: hash-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-${{ needs.check-hash.outputs.hash }}
