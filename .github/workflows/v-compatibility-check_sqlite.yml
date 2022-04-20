@@ -1,4 +1,4 @@
-name: V Compatibility Check!
+name: V Compatibility Check (sqlite)!
 on:
   schedule:
     - cron: '11,41 * * * *'

@@ -1,0 +1,119 @@
+name: V Compat Check (resolved issues)!
+on:
+  schedule:
+    - cron: '21,51 * * * *'
+
+env:
+  REPO_DIR: repo
+  HASH_STATE_FILE: last_hash
+
+jobs:
+  check-hash:
+    name: Check HASH
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.v_latest_hash.outputs.changed || steps.s2.output.changed }}
+      hash: ${{ steps.v_latest_hash.outputs.value || steps.s2.output.value }}
+    steps:
+      - name: Load latest hash
+        id: last-hash
+        uses: actions/cache@v2
+        with:
+          path: ./${{ env.HASH_STATE_FILE }}
+          key: key-${{ env.HASH_STATE_FILE }}
+      # Only for the 1st run.
+      - name: Create state file
+        if: steps.last-hash.outputs.cache-hit != 'true'
+        run: echo -n 'a' > ./${{ env.HASH_STATE_FILE }}
+      - name: Get V repo latest hash
+        id: v_latest_hash
+        run: |
+          the_last_hash=$(git ls-remote https://github.com/vlang/v.git master | awk '{ print $1 }')
+          echo "::set-output name=value::$the_last_hash"
+          if [ $the_last_hash != $(cat ./${{ env.HASH_STATE_FILE }}) ]; then 
+            echo "::set-output name=changed::true"
+          fi
+        timeout-minutes: 1
+      - name: fallback s1
+        if: steps.v_latest_hash.conclusion == 'failure'
+        uses: actions/checkout@v2
+        with:
+          repository: vlang/v
+          path: v
+      - name: fallback s2
+        id: s2
+        if: steps.v_latest_hash.conclusion == 'failure'
+        run: |
+          the_last_hash=$(git rev-parse HEAD)
+          echo "::set-output name=value::$(the_last_hash)"
+          if [ $the_last_hash != $(cat ./${{ env.HASH_STATE_FILE }}) ]; then 
+            echo "::set-output name=changed::true"
+          fi
+
+  compat-check:
+    # As this action is for checking V. compatibility,
+    # no need to run further jobs if V repo doesn't changed.
+    needs: [check-hash]
+    # if: needs.check-hash.steps.is-last-hash.outputs.cache-hit != 'true'
+    if: needs.check-hash.outputs.changed == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Load latest hash
+        id: last-hash
+        uses: actions/cache@v3
+        with:
+          path: ./${{ env.HASH_STATE_FILE }}
+          key: key-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-${{ needs.check-hash.outputs.hash }}
+          restore-keys: |
+            key-${{ env.HASH_STATE_FILE }}-${{ runner.os }}-
+            key-${{ env.HASH_STATE_FILE }}-
+      - name: \[pre] V (checkout)
+        uses: actions/checkout@v2
+        with:
+          repository: vlang/v
+          path: v
+      - name: \[pre] V (build) (linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: make -j$(nproc)
+        working-directory: ./v
+      - name: \[pre] V (build) (macos)
+        if: matrix.os == 'macos-latest'
+        run: make -j$(sysctl -n hw.logicalcpu)
+        working-directory: ./v
+      - name: \[pre] V (symlink)
+        run: sudo ./v symlink
+        working-directory: ./v
+
+      - name: \[pre] V (print info)
+        run: v doctor
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: ken0x0a/v-issue-build-error-1
+          ssh-key: ${{ secrets.DEPLOY_KEY_V_ISSUE_BUILD_ERROR_1 }}
+          path: ${{ env.REPO_DIR }}
+
+      # TODO: enable multiple tests and report stat if fail
+      - name: Test (ken0x0a/v-issue-build-error-1)
+        run: v test .
+        working-directory: ${{ env.REPO_DIR }}
+
+
+      - name: Update state
+        run: echo -n "${{ needs.check-hash.outputs.hash }}" > ./${{ env.HASH_STATE_FILE }}
+
+      - name: set prev hash
+        if: failure()
+        id: prev_hash
+        run: echo "::set-output name=value::$(cat ./${{ env.HASH_STATE_FILE }})"
+      - name: Report V_REPO Hash to Discord
+        if: failure()
+        run: |
+          curl -X POST -H "Content-Type: application/json" -d '{"content": "[${{ runner.os }}] **${{ github.repository }}** start failing after \"${{ steps.prev_hash.outputs.value }}\" .. \"${{ needs.check-hash.outputs.hash }}\"\n<${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}>\n<https://github.com/vlang/v/compare/${{ steps.prev_hash.outputs.value }}...${{ needs.check-hash.outputs.hash }}>"}' $DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
